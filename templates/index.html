@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Registro e consulta de evidências pedagógicas da escola.">
+  <title>Portal de Evidências Pedagógicas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="navbar navbar-expand-lg">
+      <div class="container-xl">
+        <a class="navbar-brand d-flex align-items-center gap-3" href="{{ url_for('index') }}">
+          <img class="brand-logo" src="{{ url_for('static', filename='images/logo-escola.png') }}" alt="Logo da EE Profª Luciana Maria Pedroso Rossi da Silva">
+          <span><strong>Portal de Evidências</strong><small>EE PROFª LUCIANA MARIA PEDROSO ROSSI DA SILVA</small></span>
+        </a>
+        <div class="header-status"><span class="status-dot"></span> Ambiente local seguro</div>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container-xl py-4 py-lg-5">
+    <section class="intro-row mb-4 mb-lg-5">
+      <div>
+        <p class="eyebrow">Gestão pedagógica <span></span></p>
+        <h1>Registre o que acontece<br><em>em sala de aula.</em></h1>
+        <p class="lead-copy">Centralize relatos e arquivos que comprovam o trabalho pedagógico desenvolvido pela equipe docente.</p>
+      </div>
+      <div class="summary-note"><strong>{{ evidences|length }}</strong><span>evidência{% if evidences|length != 1 %}s{% endif %}<br>registrada{% if evidences|length != 1 %}s{% endif %}</span></div>
+    </section>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-stack mb-4" aria-live="polite">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="row g-4 g-xl-5 align-items-start">
+      <div class="col-lg-5">
+        <section class="form-panel">
+          <div class="panel-heading">
+            <div><span class="section-number">01</span><h2>Nova evidência</h2></div>
+            <span class="required-note">* obrigatório</span>
+          </div>
+          <form method="post" enctype="multipart/form-data" class="row g-3 needs-validation" novalidate>
+            <div class="col-12">
+              <label for="teacher_name" class="form-label">Nome do professor <span>*</span></label>
+              <input type="text" class="form-control" id="teacher_name" name="teacher_name" placeholder="Ex.: Ana Carolina Souza" required maxlength="120">
+              <div class="invalid-feedback">Informe o nome do professor.</div>
+            </div>
+            <div class="col-md-6">
+              <label for="subject" class="form-label">Componente curricular <span>*</span></label>
+              <input type="text" class="form-control" id="subject" name="subject" placeholder="Ex.: Matemática" required maxlength="120">
+              <div class="invalid-feedback">Informe a disciplina.</div>
+            </div>
+            <div class="col-md-6">
+              <label for="class_name" class="form-label">Turma <span>*</span></label>
+              <input type="text" class="form-control" id="class_name" name="class_name" placeholder="Ex.: 7º Ano B" required maxlength="120">
+              <div class="invalid-feedback">Informe a turma.</div>
+            </div>
+            <div class="col-md-6">
+              <label for="lesson_date" class="form-label">Data da aula <span>*</span></label>
+              <input type="date" class="form-control" id="lesson_date" name="lesson_date" required>
+              <div class="invalid-feedback">Informe a data da aula.</div>
+            </div>
+            <div class="col-md-6">
+              <label for="bimester" class="form-label">Bimestre <span>*</span></label>
+              <select class="form-select" id="bimester" name="bimester" required>
+                <option value="" selected disabled>Selecione</option>
+                <option value="1º Bimestre">1º Bimestre</option>
+                <option value="2º Bimestre">2º Bimestre</option>
+                <option value="3º Bimestre">3º Bimestre</option>
+                <option value="4º Bimestre">4º Bimestre</option>
+              </select>
+              <div class="invalid-feedback">Selecione o bimestre.</div>
+            </div>
+            <div class="col-12">
+              <label for="description" class="form-label">Descrição da aula e alinhamento à BNCC <span>*</span></label>
+              <textarea class="form-control" id="description" name="description" rows="5" placeholder="Descreva o conteúdo, objetivos e habilidades trabalhadas..." required></textarea>
+              <div class="invalid-feedback">Descreva a aula realizada.</div>
+            </div>
+            <div class="col-12">
+              <label for="evidence_file" class="form-label">Arquivo da evidência <span>*</span></label>
+              <label class="upload-zone" for="evidence_file">
+                <span class="upload-icon" aria-hidden="true">↑</span>
+                <span><strong>Escolha um arquivo</strong><small>JPG, PNG ou PDF · até 10 MB</small></span>
+                <input class="visually-hidden" type="file" id="evidence_file" name="evidence_file" accept=".jpg,.jpeg,.png,.pdf" required>
+              </label>
+              <div id="file-name" class="file-name" aria-live="polite"></div>
+              <div class="invalid-feedback d-block" id="file-feedback"></div>
+            </div>
+            <div class="col-12 pt-2">
+              <button type="submit" class="btn btn-submit w-100"><span>Salvar evidência</span><span aria-hidden="true">→</span></button>
+            </div>
+          </form>
+        </section>
+      </div>
+
+      <div class="col-lg-7">
+        <section class="evidence-panel">
+          <div class="panel-heading listing-heading">
+            <div><span class="section-number">02</span><h2>Registros recentes</h2></div>
+            <span class="sort-label">Mais recentes primeiro</span>
+          </div>
+          {% if evidences %}
+            <div class="evidence-list">
+              {% for evidence in evidences %}
+                <article class="evidence-card">
+                  <div class="evidence-preview {% if not is_image(evidence.filename) %}pdf-preview{% endif %}">
+                    {% if is_image(evidence.filename) %}
+                      <img src="{{ url_for('uploaded_file', filename=evidence.filename) }}" alt="Evidência da aula de {{ evidence.subject }}" loading="lazy">
+                    {% else %}
+                      <span class="pdf-icon">PDF</span>
+                    {% endif %}
+                  </div>
+                  <div class="evidence-body">
+                    <div class="card-topline"><span class="bimester-tag">{{ evidence.bimester }}</span><time datetime="{{ evidence.lesson_date.isoformat() }}">{{ evidence.lesson_date.strftime('%d/%m/%Y') }}</time></div>
+                    <h3>{{ evidence.subject }} <span>·</span> {{ evidence.class_name }}</h3>
+                    <p class="teacher-line">{{ evidence.teacher_name }}</p>
+                    <p class="description">{{ evidence.description }}</p>
+                    <a class="open-link" href="{{ url_for('uploaded_file', filename=evidence.filename) }}" target="_blank" rel="noopener">Abrir arquivo <span aria-hidden="true">↗</span></a>
+                  </div>
+                </article>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="empty-state">
+              <div class="empty-icon" aria-hidden="true">＋</div>
+              <h3>Nenhuma evidência ainda</h3>
+              <p>Os registros enviados pela equipe aparecerão aqui, organizados por data.</p>
+            </div>
+          {% endif %}
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer"><div class="container-xl">Portal de Evidências Pedagógicas <span>•</span> Gestão escolar com propósito</div></footer>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    (() => {
+      const form = document.querySelector('.needs-validation');
+      const fileInput = document.querySelector('#evidence_file');
+      const fileName = document.querySelector('#file-name');
+      const fileFeedback = document.querySelector('#file-feedback');
+      fileInput.addEventListener('change', () => {
+        const file = fileInput.files[0];
+        fileName.textContent = file ? file.name : '';
+        fileFeedback.textContent = file && file.size > 10 * 1024 * 1024 ? 'O arquivo deve ter no máximo 10 MB.' : '';
+      });
+      form.addEventListener('submit', event => {
+        if (!form.checkValidity() || (fileInput.files[0] && fileInput.files[0].size > 10 * 1024 * 1024)) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+      });
+    })();
+  </script>
+</body>
+</html>
